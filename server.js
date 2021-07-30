@@ -5,28 +5,22 @@ const app = express();
 const dotenv = require('dotenv');
 const mongoose = require("mongoose");
 
-const routes = require('./client/server/routes')
+const routes = require('./routes')
 
 // Connection to the MongoDB Database
 /* const server = require('./server/db'); */  // OR
 // require('./database');
-
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+//app.use(cors());
 app.use(express.json());
 
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
 
-// API
-// const books = require('./routes');
-// app.use('/api', books);
-
-// app.get('/home', (req, res) => {
-//     res.send("Hello world")
-// })
-
-app.use(express.static(path.join(__dirname, '../client/build')))
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build'))
-})
+// Add routes, both API and view
+app.use(routes);
 
 
 const db = mongoose.connect(`mongodb+srv://nathan:password1234@cluster0.dfgvs.mongodb.net/googleBooks?retryWrites=true&w=majority`, {
@@ -36,9 +30,7 @@ const db = mongoose.connect(`mongodb+srv://nathan:password1234@cluster0.dfgvs.mo
 .then(() => console.log("MongoDB Database is Connected"))
 .catch((err) => console.log(`An error has occured in DB connection: ${err}`))
 
-app.use(require("./client/server/routes"));
-
-const PORT = process.env.PORT || 5000;
-app.listen(process.env.PORT, () => {
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
